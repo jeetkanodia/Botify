@@ -49,8 +49,11 @@ const SongDetails = () => {
           )}
         </div>
       </div>
+      <RelatedSongs />
     </div>
   );
 };
 
+//https://www.youtube.com/watch?v=I1cpb0tYV74&list=WL&index=19&t=6836s
+// 2:04:19
 export default SongDetails;
