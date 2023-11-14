@@ -3,20 +3,43 @@ import { useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { DetailsHeader, Error, Loader, RelatedSongs } from "../components";
 import { setActiveSong, playPause } from "../redux/features/playerSlice";
-import { useGetSongDetailsQuery } from "../redux/services/shazamCore";
+import {
+  useGetSongDetailsQuery,
+  useGetSongRelatedQuery,
+} from "../redux/services/shazamCore";
 
 const SongDetails = () => {
   const [lyricData, setLyricData] = useState([]);
   const [lyricid, setLyricid] = useState(null);
-
+  const [relatedtrackid, setRelatedtrackid] = useState(null);
   const dispatch = useDispatch();
   const { songid } = useParams();
   const { activeSong, isPlaying } = useSelector((state) => state.player);
   const { data: songData, isFetching: isFetchingSongDetails } =
     useGetSongDetailsQuery({ songid });
 
+  const {
+    data,
+    isFetching: isFetchingRelatedSongs,
+    error,
+  } = useGetSongRelatedQuery({ relatedtrackid });
+
+  const handlePlayClick = (song, i) => {
+    dispatch(setActiveSong({ song, i, data }));
+    dispatch(playPause(true));
+  };
+  const handlePauseClick = () => {
+    dispatch(playPause(false));
+  };
+
   useEffect(() => {
     if (songData) {
+      const relatedTrackID =
+        songData?.resources["shazam-songs"][songid]?.["relationships"]?.[
+          "related-tracks"
+        ]?.["data"][0]?.["id"];
+      setRelatedtrackid(relatedTrackID);
+
       const lyricID =
         songData?.resources["shazam-songs"][songid]?.["relationships"]?.[
           "lyrics"
@@ -30,8 +53,12 @@ const SongDetails = () => {
         setLyricData(LyricData);
       }
     }
-    console.log(songData);
   }, [songid, songData]);
+
+  console.log(data);
+
+  if (isFetchingSongDetails || isFetchingRelatedSongs)
+    return <Loader title={"Searching Song Details"} />;
   return (
     <div className="flex flex-col">
       <DetailsHeader songData={songData} songid={songid} />
@@ -49,7 +76,13 @@ const SongDetails = () => {
           )}
         </div>
       </div>
-      <RelatedSongs />
+      <RelatedSongs
+        data={data}
+        isPlaying={isPlaying}
+        activeSong={activeSong}
+        handlePauseClick={handlePauseClick}
+        handlePlayClick={handlePlayClick}
+      />
     </div>
   );
 };
