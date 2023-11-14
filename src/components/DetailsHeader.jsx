@@ -33,8 +33,12 @@ const DetailsHeader = ({ artistId, artitstData, songData, songid }) => {
               </p>
             </Link>
           )}
+          <p className="text-base text-gray-400 mt-2">
+            {artistId ? artitstData : songDataAttributes?.genres?.primary}
+          </p>
         </div>
       </div>
+      <div className="w-full sm:h-44 h-24" />
     </div>
   );
 };
