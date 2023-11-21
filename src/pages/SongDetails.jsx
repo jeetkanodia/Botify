@@ -15,23 +15,23 @@ const SongDetails = () => {
   const dispatch = useDispatch();
   const { songid } = useParams();
   const { activeSong, isPlaying } = useSelector((state) => state.player);
+
   const { data: songData, isFetching: isFetchingSongDetails } =
     useGetSongDetailsQuery({ songid });
 
   const {
-    data,
+    data: relatedSongData,
     isFetching: isFetchingRelatedSongs,
     error,
   } = useGetSongRelatedQuery({ relatedtrackid });
 
   const handlePlayClick = (song, i) => {
-    dispatch(setActiveSong({ song, i, data }));
+    dispatch(setActiveSong({ song, i, songData }));
     dispatch(playPause(true));
   };
   const handlePauseClick = () => {
     dispatch(playPause(false));
   };
-
   useEffect(() => {
     if (songData) {
       const relatedTrackID =
@@ -55,8 +55,6 @@ const SongDetails = () => {
     }
   }, [songid, songData]);
 
-  console.log(data);
-
   if (isFetchingSongDetails || isFetchingRelatedSongs)
     return <Loader title={"Searching Song Details"} />;
   return (
@@ -77,7 +75,8 @@ const SongDetails = () => {
         </div>
       </div>
       <RelatedSongs
-        data={data}
+        data={relatedSongData}
+        relatedTrackID={relatedtrackid}
         isPlaying={isPlaying}
         activeSong={activeSong}
         handlePauseClick={handlePauseClick}
